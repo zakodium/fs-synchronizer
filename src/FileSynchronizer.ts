@@ -71,8 +71,11 @@ export class FileSynchronizer extends EventEmitter {
           const filePath = join(rootPath, filename);
           const fileStat = await stat(filePath);
 
-          if (fileStat.isDirectory() && depth < this.maxDepth) {
-            return this.scanDirectory(filePath, depth + 1);
+          if (fileStat.isDirectory()) {
+            if (depth < this.maxDepth) {
+              return this.scanDirectory(filePath, depth + 1);
+            }
+            return null;
           } else if (fileStat.isFile()) {
             const fileInfo: FileInfo = {
               path: resolve(filePath),
