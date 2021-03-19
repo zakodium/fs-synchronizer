@@ -219,3 +219,33 @@ test('should match correctly with both inclusion and exclusions', async () => {
   const controller = new AbortController();
   await sync.walk({ signal: controller.signal });
 });
+
+test('stop when at max depth', async () => {
+  expect.assertions(2);
+
+  const syncOptions: SyncOptions = {
+    root: 'test-utils',
+    maxDepth: 1,
+  };
+
+  const sync = new FileSynchronizer(syncOptions);
+
+  const files: FileInfo[] = [];
+  const excludedFiles: FileInfo[] = [];
+
+  sync.on('file', (fileInfo) => {
+    files.push(fileInfo);
+  });
+
+  sync.on('excluded-file', (fileInfo) => {
+    excludedFiles.push(fileInfo);
+  });
+
+  sync.on('end', () => {
+    expect(files).toHaveLength(3);
+    expect(excludedFiles).toHaveLength(0);
+  });
+
+  const controller = new AbortController();
+  await sync.walk({ signal: controller.signal });
+});

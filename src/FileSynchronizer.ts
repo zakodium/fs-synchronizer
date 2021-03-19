@@ -35,7 +35,7 @@ export class FileSynchronizer extends EventEmitter {
     if (root === undefined) {
       throw new TypeError(`root is undefined`);
     }
-    if (Number.isInteger(maxDepth) && maxDepth !== Infinity) {
+    if (!Number.isInteger(maxDepth) && maxDepth !== Infinity) {
       throw new TypeError(`maxDepth should be an integer`);
     }
     if (!Array.isArray(patterns)) {
