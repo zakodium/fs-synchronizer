@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { readdir, stat } from 'fs/promises';
+import { opendir, readdir, stat } from 'fs/promises';
 import { join, resolve, extname } from 'path';
 
 import { Minimatch } from 'minimatch';
@@ -52,52 +52,42 @@ export class FileSynchronizer extends EventEmitter {
       };
     });
 
-    this.defaultInclude =
-      patterns.find(({ type }) => type === 'include') === undefined;
+    this.defaultInclude = !patterns.some(({ type }) => type === 'include');
   }
 
-  public async walk(options: WalkOptions) {
-    if (!options.signal.aborted) {
+  public async walk(options: WalkOptions = {}) {
+    if (!options?.signal?.aborted) {
       await this.scanDirectory(this.root, 0);
     }
     this.emit('end');
   }
 
   private async scanDirectory(rootPath: string, depth: number) {
-    const filenames = await readdir(rootPath);
-    await Promise.all(
-      filenames
-        .map(async (filename) => {
-          const filePath = join(rootPath, filename);
-          const fileStat = await stat(filePath);
+    const dir = await opendir(rootPath);
+    for await (const dirent of dir) {
+      const { name } = dirent;
+      const filePath = join(rootPath, name);
+      const fileStat = await stat(filePath);
 
-          if (fileStat.isDirectory()) {
-            if (depth < this.maxDepth) {
-              return this.scanDirectory(filePath, depth + 1);
-            }
-            return null;
-          } else if (fileStat.isFile()) {
-            const fileInfo: FileInfo = {
-              path: resolve(filePath),
-              relativePath: filePath,
-              filename,
-              extension: extname(filename),
-              size: fileStat.size,
-              creationDate: fileStat.birthtime,
-              modificationDate: fileStat.mtime,
-              stat: fileStat,
-            };
-            const event = this.shouldInclude(fileInfo)
-              ? 'file'
-              : 'excluded-file';
-            this.emit(event, fileInfo);
-            return null;
-          } else {
-            throw new Error(`Scanned file is neither a file nor a directory`);
-          }
-        })
-        .filter((promise) => promise !== null),
-    );
+      if (dirent.isDirectory()) {
+        if (depth < this.maxDepth) {
+          await this.scanDirectory(filePath, depth + 1);
+        }
+      } else {
+        const fileInfo: FileInfo = {
+          path: resolve(filePath),
+          relativePath: filePath,
+          filename: name,
+          extension: extname(name),
+          size: fileStat.size,
+          creationDate: fileStat.birthtime,
+          modificationDate: fileStat.mtime,
+          stat: fileStat,
+        };
+        const event = this.shouldInclude(fileInfo) ? 'file' : 'excluded-file';
+        this.emit(event, fileInfo);
+      }
+    }
   }
 
   private shouldInclude(fileInfo: FileInfo): boolean {

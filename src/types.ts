@@ -32,7 +32,7 @@ export interface FileInfo {
 }
 
 export interface WalkOptions {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export type WalkCallback = (file: FileInfo) => void;

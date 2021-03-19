@@ -21,10 +21,7 @@ async function stub(options: SyncOptions) {
     excludedFiles.push(fileInfo);
   });
 
-  sync.on('end', () => {});
-
-  const controller = new AbortController();
-  await sync.walk({ signal: controller.signal });
+  await sync.walk();
 
   return {
     files,
