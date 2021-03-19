@@ -3,11 +3,13 @@ import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import { FileSynchronizer } from '../FileSynchronizer';
 import { FileInfo, SyncOptions } from '../types';
 
+const root = 'test-utils';
+
 test('should match with files without patterns', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
   };
 
   const sync = new FileSynchronizer(syncOptions);
@@ -35,7 +37,7 @@ test('should match with exclusion, but no inclusion', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [{ type: 'exclude', pattern: 'a*' }],
   };
 
@@ -64,7 +66,7 @@ test('should match with inclusion, but no exclusion', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [{ type: 'include', pattern: 'a*' }],
   };
 
@@ -93,7 +95,7 @@ test('should match correctly with both inclusion and exclusion (include)', async
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [
       { type: 'include', pattern: 'a*' },
       { type: 'exclude', pattern: '[abc]*' },
@@ -125,7 +127,7 @@ test('should match correctly with both inclusion and exclusion (exclude)', async
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [
       { type: 'exclude', pattern: 'b*' },
       { type: 'include', pattern: '[cd]*' },
@@ -157,7 +159,7 @@ test('should match correctly with both inclusions and exclusion', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [
       { type: 'include', pattern: 'a*' },
       { type: 'exclude', pattern: '[cd]*' },
@@ -190,7 +192,7 @@ test('should match correctly with both inclusion and exclusions', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     patterns: [
       { type: 'exclude', pattern: 'a*' },
       { type: 'include', pattern: '[cd]*' },
@@ -219,12 +221,11 @@ test('should match correctly with both inclusion and exclusions', async () => {
   const controller = new AbortController();
   await sync.walk({ signal: controller.signal });
 });
-
 test('stop when at max depth', async () => {
   expect.assertions(2);
 
   const syncOptions: SyncOptions = {
-    root: 'test-utils',
+    root,
     maxDepth: 1,
   };
 
