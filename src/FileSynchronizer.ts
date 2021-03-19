@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { opendir, readdir, stat } from 'fs/promises';
+import { opendir, stat } from 'fs/promises';
 import { join, resolve, extname } from 'path';
 
 import { Minimatch } from 'minimatch';

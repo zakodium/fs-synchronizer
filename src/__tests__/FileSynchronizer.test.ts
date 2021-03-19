@@ -1,5 +1,3 @@
-import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
-
 import { FileSynchronizer } from '../FileSynchronizer';
 import { FileInfo, SyncOptions } from '../types';
 
