@@ -1,7 +1,7 @@
 {
   "name": "fs-synchronizer",
   "version": "0.1.0",
-  "description": "",
+  "description": "Recursively find files in folder and extract file informations.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "keywords": [],
