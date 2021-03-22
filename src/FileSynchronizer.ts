@@ -80,7 +80,7 @@ export class FileSynchronizer extends EventEmitter {
 
       if (dirent.isDirectory()) {
         if (depth < this.maxDepth) {
-          await this.scanDirectory(filePath, depth + 1);
+          await this.scanDirectory(filePath, depth + 1, signal);
         }
       } else {
         const fileInfo: FileInfo = {
