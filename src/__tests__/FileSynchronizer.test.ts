@@ -1,3 +1,6 @@
+// eslint-disable-next-line import/no-unassigned-import
+import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
+
 import { FileSynchronizer } from '../FileSynchronizer';
 import { FileInfo, SyncOptions } from '../types';
 
@@ -197,4 +200,60 @@ test("throws if root directory doesn't exist", async () => {
     await stub({ root: 'do not exist' });
   };
   await expect(t).rejects.toThrow('ENOENT');
+});
+test('throws if aborted before walks', async () => {
+  const sync = new FileSynchronizer(defaultOptions);
+
+  const eventsCounts = [0, 0, 0];
+  sync.on('file', () => eventsCounts[0]++);
+  sync.on('excluded-file', () => eventsCounts[1]++);
+  sync.on('end', () => eventsCounts[2]++);
+
+  const controller = new AbortController();
+  controller.abort();
+  const t = async () => {
+    await sync.walk({ signal: controller.signal });
+  };
+  await expect(t).rejects.toThrow('operation was aborted');
+  expect(eventsCounts).toStrictEqual([0, 0, 0]);
+});
+test('throws if aborted during execution', async () => {
+  const sync = new FileSynchronizer(defaultOptions);
+  const controller = new AbortController();
+
+  const files = [];
+
+  let fileEventCount = 0;
+
+  sync.on('file', (fileInfo) => {
+    fileEventCount++;
+    files.push(fileInfo);
+    // eslint-disable-next-line jest/no-if
+    if (files.length === 1) {
+      controller.abort();
+    }
+  });
+
+  const t = async () => {
+    await sync.walk({ signal: controller.signal });
+  };
+  await expect(t).rejects.toThrow('operation was aborted');
+  expect(fileEventCount).toBe(1);
+});
+test("doesn't reject if aborted after last file", async () => {
+  const sync = new FileSynchronizer(defaultOptions);
+  const controller = new AbortController();
+
+  const files = [];
+
+  sync.on('file', (fileInfo) => {
+    files.push(fileInfo);
+    // eslint-disable-next-line jest/no-if
+    if (files.length === 4) {
+      controller.abort();
+    }
+  });
+
+  // Should not throw
+  await sync.walk({ signal: controller.signal });
 });

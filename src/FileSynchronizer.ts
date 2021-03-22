@@ -56,22 +56,31 @@ export class FileSynchronizer extends EventEmitter {
   }
 
   public async walk(options: WalkOptions = {}) {
-    if (!options?.signal?.aborted) {
-      await this.scanDirectory(this.root, 0);
+    if (options.signal?.aborted) {
+      throw new Error('operation was aborted');
     }
+
+    await this.scanDirectory(this.root, 0, options.signal);
     this.emit('end');
   }
 
-  private async scanDirectory(rootPath: string, depth: number) {
+  private async scanDirectory(
+    rootPath: string,
+    depth: number,
+    signal?: AbortSignal,
+  ) {
     const dir = await opendir(rootPath);
     for await (const dirent of dir) {
+      if (signal?.aborted) {
+        throw new Error('operation was aborted');
+      }
       const { name } = dirent;
       const filePath = join(rootPath, name);
       const fileStat = await stat(filePath);
 
       if (dirent.isDirectory()) {
         if (depth < this.maxDepth) {
-          await this.scanDirectory(filePath, depth + 1);
+          await this.scanDirectory(filePath, depth + 1, signal);
         }
       } else {
         const fileInfo: FileInfo = {
