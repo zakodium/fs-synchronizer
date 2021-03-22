@@ -1,5 +1,5 @@
 import { FileSynchronizer } from '../FileSynchronizer';
-import { FileInfo, Pattern, SyncOptions } from '../types';
+import { FileInfo, SyncOptions } from '../types';
 
 const defaultOptions = {
   root: 'test-utils',
@@ -29,21 +29,23 @@ async function stub(options: SyncOptions) {
 
 test('should throws if "root" is undefined', async () => {
   const t = async () => {
-    await stub({ ...defaultOptions, root: (undefined as unknown) as string });
+    // @ts-expect-error
+    await stub({ ...defaultOptions, root: undefined });
   };
-  await expect(t).rejects.toBeInstanceOf(TypeError);
+  await expect(t).rejects.toThrow('root is undefined');
 });
 test('should throws if "maxDepth" is not an integer', async () => {
   const t = async () => {
     await stub({ ...defaultOptions, maxDepth: 4.2 });
   };
-  await expect(t).rejects.toBeInstanceOf(TypeError);
+  await expect(t).rejects.toThrow('maxDepth should be an integer');
 });
 test('should throws if "patterns" is not an array', async () => {
   const t = async () => {
-    await stub({ ...defaultOptions, patterns: ({} as unknown) as Pattern[] });
+    // @ts-expect-error
+    await stub({ ...defaultOptions, patterns: {} });
   };
-  await expect(t).rejects.toBeInstanceOf(TypeError);
+  await expect(t).rejects.toThrow('patterns should be an array');
 });
 test('should match with files without patterns', async () => {
   const syncOptions: SyncOptions = defaultOptions;
@@ -189,4 +191,10 @@ test('"end" event emitted before promise resolution', async () => {
   });
 
   await sync.walk().then(() => (isPromiseResolved = true));
+});
+test("throws if root directory doesn't exist", async () => {
+  const t = async () => {
+    await stub({ root: 'do not exist' });
+  };
+  await expect(t).rejects.toThrow('ENOENT');
 });
