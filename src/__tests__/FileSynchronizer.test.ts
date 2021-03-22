@@ -203,12 +203,19 @@ test("throws if root directory doesn't exist", async () => {
 });
 test('throws if aborted before walks', async () => {
   const sync = new FileSynchronizer(defaultOptions);
+
+  const eventsCounts = [0, 0, 0];
+  sync.on('file', () => eventsCounts[0]++);
+  sync.on('excluded-file', () => eventsCounts[1]++);
+  sync.on('end', () => eventsCounts[2]++);
+
   const controller = new AbortController();
   controller.abort();
   const t = async () => {
     await sync.walk({ signal: controller.signal });
   };
   await expect(t).rejects.toThrow('operation was aborted');
+  expect(eventsCounts).toStrictEqual([0, 0, 0]);
 });
 test('throws if aborted during execution', async () => {
   const sync = new FileSynchronizer(defaultOptions);
@@ -216,7 +223,10 @@ test('throws if aborted during execution', async () => {
 
   const files = [];
 
+  let fileEventCount = 0;
+
   sync.on('file', (fileInfo) => {
+    fileEventCount++;
     files.push(fileInfo);
     // eslint-disable-next-line jest/no-if
     if (files.length === 1) {
@@ -228,6 +238,7 @@ test('throws if aborted during execution', async () => {
     await sync.walk({ signal: controller.signal });
   };
   await expect(t).rejects.toThrow('operation was aborted');
+  expect(fileEventCount).toBe(1);
 });
 test("doesn't reject if aborted after last file", async () => {
   const sync = new FileSynchronizer(defaultOptions);
@@ -243,8 +254,6 @@ test("doesn't reject if aborted after last file", async () => {
     }
   });
 
-  const t = async () => {
-    await sync.walk({ signal: controller.signal });
-  };
-  expect(t).not.toThrow();
+  // Should not throw
+  await sync.walk({ signal: controller.signal });
 });
