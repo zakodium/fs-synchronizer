@@ -39,7 +39,7 @@ await sync.walk();
 
 [npm-image]: https://img.shields.io/npm/v/fs-synchronizer.svg
 [npm-url]: https://www.npmjs.com/package/fs-synchronizer
-[ci-image]: https://github.com/zakodium/fs-synchronizer/workflows/Node.js%20CI/badge.svg?branch=master
+[ci-image]: https://github.com/zakodium/fs-synchronizer/workflows/Node.js%20CI/badge.svg?branch=main
 [ci-url]: https://github.com/zakodium/fs-synchronizer/actions?query=workflow%3A%22Node.js+CI%22
 [codecov-image]: https://img.shields.io/codecov/c/github/zakodium/fs-synchronizer.svg
 [codecov-url]: https://codecov.io/gh/zakodium/fs-synchronizer
