@@ -5,7 +5,7 @@
 [![Test coverage][codecov-image]][codecov-url]
 [![npm download][download-image]][download-url]
 
-.
+Recursively find files in folder and extract file informations.
 
 ## Installation
 
@@ -14,10 +14,23 @@
 ## Usage
 
 ```js
-import { myModule } from 'fs-synchronizer';
+import { FileSynchronizer } from 'fs-synchronizer';
+const sync = new FileSynchronizer({
+  root: 'test-utils',
+  maxDepth: 2,
+  patterns: [{ type: 'include', pattern: 'a*' }],
+});
 
-const result = myModule(args);
-// result is ...
+sync.on('file', (fileInfo) => {
+  console.log(`Found file: ${fileInfo.filename}`);
+});
+sync.on('excluded-file', (fileInfo) => {
+  console.log(`Excluded file: ${fileInfo.filename}`);
+});
+sync.on('end', () => {
+  console.log('Finished walking');
+});
+await sync.walk();
 ```
 
 ## License
