@@ -32,20 +32,20 @@ test('should throws if "root" is undefined', async () => {
     // @ts-expect-error
     await stub({ ...defaultOptions, root: undefined });
   };
-  await expect(t).rejects.toThrow('TypeError');
+  await expect(t).rejects.toThrow('root is undefined');
 });
 test('should throws if "maxDepth" is not an integer', async () => {
   const t = async () => {
     await stub({ ...defaultOptions, maxDepth: 4.2 });
   };
-  await expect(t).rejects.toThrow('TypeError');
+  await expect(t).rejects.toThrow('maxDepth should be an integer');
 });
 test('should throws if "patterns" is not an array', async () => {
   const t = async () => {
     // @ts-expect-error
     await stub({ ...defaultOptions, patterns: {} });
   };
-  await expect(t).rejects.toThrow('TypeError');
+  await expect(t).rejects.toThrow('patterns should be an array');
 });
 test('should match with files without patterns', async () => {
   const syncOptions: SyncOptions = defaultOptions;
