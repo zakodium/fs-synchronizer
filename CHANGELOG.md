@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/zakodium/fs-synchronizer/compare/v0.1.0...v0.2.0) (2021-03-22)
+
+
+### Features
+
+* write a readme ([#8](https://www.github.com/zakodium/fs-synchronizer/issues/8)) ([55ad054](https://www.github.com/zakodium/fs-synchronizer/commit/55ad054e974693bc0d5709d2e292cdd9f21c0975))
+
 ## 0.1.0 (2021-03-22)
 
 
