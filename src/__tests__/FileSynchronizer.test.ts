@@ -126,3 +126,49 @@ test('stop when at max depth', async () => {
   expect(files).toHaveLength(3);
   expect(excludedFiles).toHaveLength(0);
 });
+test('"end" event emitted after other events', async () => {
+  expect.assertions(2);
+
+  const syncOptions: SyncOptions = {
+    ...defaultOptions,
+    patterns: [{ type: 'include', pattern: '[abc].txt' }],
+  };
+
+  const sync = new FileSynchronizer(syncOptions);
+
+  const files: FileInfo[] = [];
+  const excludedFiles: FileInfo[] = [];
+
+  sync.on('file', (fileInfo) => {
+    files.push(fileInfo);
+  });
+
+  sync.on('excluded-file', (fileInfo) => {
+    excludedFiles.push(fileInfo);
+  });
+
+  sync.on('end', () => {
+    expect(files).toHaveLength(3);
+    expect(excludedFiles).toHaveLength(1);
+  });
+
+  await sync.walk();
+});
+test('"end" event emitted before promise resolution', async () => {
+  expect.assertions(1);
+
+  const syncOptions: SyncOptions = {
+    ...defaultOptions,
+    patterns: [{ type: 'include', pattern: '[abc].txt' }],
+  };
+
+  const sync = new FileSynchronizer(syncOptions);
+
+  let isPromiseResolved = false;
+
+  sync.on('end', () => {
+    expect(isPromiseResolved).toStrictEqual(false);
+  });
+
+  await sync.walk().then(() => (isPromiseResolved = true));
+});
