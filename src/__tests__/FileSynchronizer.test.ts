@@ -1,5 +1,5 @@
 import { FileSynchronizer } from '../FileSynchronizer';
-import { FileInfo, SyncOptions } from '../types';
+import { FileInfo, Pattern, SyncOptions } from '../types';
 
 const defaultOptions = {
   root: 'test-utils',
@@ -27,6 +27,24 @@ async function stub(options: SyncOptions) {
   };
 }
 
+test('should throws if "root" is undefined', async () => {
+  const t = async () => {
+    await stub({ ...defaultOptions, root: (undefined as unknown) as string });
+  };
+  await expect(t).rejects.toBeInstanceOf(TypeError);
+});
+test('should throws if "maxDepth" is not an integer', async () => {
+  const t = async () => {
+    await stub({ ...defaultOptions, maxDepth: 4.2 });
+  };
+  await expect(t).rejects.toBeInstanceOf(TypeError);
+});
+test('should throws if "patterns" is not an array', async () => {
+  const t = async () => {
+    await stub({ ...defaultOptions, patterns: ({} as unknown) as Pattern[] });
+  };
+  await expect(t).rejects.toBeInstanceOf(TypeError);
+});
 test('should match with files without patterns', async () => {
   const syncOptions: SyncOptions = defaultOptions;
 
