@@ -1,6 +1,8 @@
 // eslint-disable-next-line import/no-unassigned-import
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
 
+import { join } from 'path';
+
 import { FileSynchronizer } from '../FileSynchronizer';
 import { FileInfo, SyncOptions } from '../types';
 
@@ -256,4 +258,30 @@ test("doesn't reject if aborted after last file", async () => {
 
   // Should not throw
   await sync.walk({ signal: controller.signal });
+});
+test('file info should be correct', async () => {
+  const sync = new FileSynchronizer({
+    ...defaultOptions,
+    patterns: [{ type: 'include', pattern: 'a*' }],
+  });
+
+  const files: FileInfo[] = [];
+
+  sync.on('file', (fileInfo) => {
+    files.push(fileInfo);
+  });
+
+  await sync.walk();
+
+  expect(files).toHaveLength(1);
+
+  const [file] = files;
+  expect(file.path).toBe(join(process.cwd(), 'test-utils', 'a.txt'));
+  expect(file.relativePath).toBe(join('test-utils', 'a.txt'));
+  expect(file.filename).toBe('a.txt');
+  expect(file.extension).toBe('.txt');
+  expect(file.size).toBe(491);
+  expect(file.creationDate.getTime()).toBeLessThan(Date.now());
+  expect(file.modificationDate.getTime()).toBeLessThan(Date.now());
+  expect(typeof file.stat).toBe('object');
 });
