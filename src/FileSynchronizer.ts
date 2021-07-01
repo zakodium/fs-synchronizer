@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import { opendir, stat } from 'fs/promises';
-import { join, resolve, extname } from 'path';
+import { join, resolve, extname, relative } from 'path';
 
 import { Minimatch } from 'minimatch';
 
@@ -60,12 +60,13 @@ export class FileSynchronizer extends EventEmitter {
       throw new Error('operation was aborted');
     }
 
-    await this.scanDirectory(this.root, 0, options.signal);
+    await this.scanDirectory(this.root, this.root, 0, options.signal);
     this.emit('end');
   }
 
   private async scanDirectory(
     rootPath: string,
+    configRoot: string,
     depth: number,
     signal?: AbortSignal,
   ) {
@@ -80,12 +81,12 @@ export class FileSynchronizer extends EventEmitter {
 
       if (dirent.isDirectory()) {
         if (depth < this.maxDepth) {
-          await this.scanDirectory(filePath, depth + 1, signal);
+          await this.scanDirectory(filePath, configRoot, depth + 1, signal);
         }
       } else {
         const fileInfo: FileInfo = {
           path: resolve(filePath),
-          relativePath: filePath,
+          relativePath: relative(configRoot, filePath),
           filename: name,
           extension: extname(name),
           size: fileStat.size,

@@ -39,12 +39,14 @@ test('should throws if "root" is undefined', async () => {
   };
   await expect(t).rejects.toThrow('root is undefined');
 });
+
 test('should throws if "maxDepth" is not an integer', async () => {
   const t = async () => {
     await stub({ ...defaultOptions, maxDepth: 4.2 });
   };
   await expect(t).rejects.toThrow('maxDepth should be an integer');
 });
+
 test('should throws if "patterns" is not an array', async () => {
   const t = async () => {
     // @ts-expect-error
@@ -52,6 +54,7 @@ test('should throws if "patterns" is not an array', async () => {
   };
   await expect(t).rejects.toThrow('patterns should be an array');
 });
+
 test('should match with files without patterns', async () => {
   const syncOptions: SyncOptions = defaultOptions;
 
@@ -60,6 +63,7 @@ test('should match with files without patterns', async () => {
   expect(files).toHaveLength(4);
   expect(excludedFiles).toHaveLength(0);
 });
+
 test('should match with exclusion, but no inclusion', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -71,6 +75,7 @@ test('should match with exclusion, but no inclusion', async () => {
   expect(files).toHaveLength(3);
   expect(excludedFiles).toHaveLength(1);
 });
+
 test('should match with inclusion, but no exclusion', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -82,6 +87,7 @@ test('should match with inclusion, but no exclusion', async () => {
   expect(files).toHaveLength(1);
   expect(excludedFiles).toHaveLength(3);
 });
+
 test('should match correctly with both inclusion and exclusion (include)', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -96,6 +102,7 @@ test('should match correctly with both inclusion and exclusion (include)', async
   expect(files).toHaveLength(1);
   expect(excludedFiles).toHaveLength(3);
 });
+
 test('should match correctly with both inclusion and exclusion (exclude)', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -110,6 +117,7 @@ test('should match correctly with both inclusion and exclusion (exclude)', async
   expect(files).toHaveLength(2);
   expect(excludedFiles).toHaveLength(2);
 });
+
 test('should match correctly with both inclusions and exclusion', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -125,6 +133,7 @@ test('should match correctly with both inclusions and exclusion', async () => {
   expect(files).toHaveLength(2);
   expect(excludedFiles).toHaveLength(2);
 });
+
 test('should match correctly with both inclusion and exclusions', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -140,6 +149,7 @@ test('should match correctly with both inclusion and exclusions', async () => {
   expect(files).toHaveLength(2);
   expect(excludedFiles).toHaveLength(2);
 });
+
 test('stop when at max depth', async () => {
   const syncOptions: SyncOptions = {
     ...defaultOptions,
@@ -151,6 +161,7 @@ test('stop when at max depth', async () => {
   expect(files).toHaveLength(3);
   expect(excludedFiles).toHaveLength(0);
 });
+
 test('"end" event emitted after other events', async () => {
   expect.assertions(2);
 
@@ -179,6 +190,7 @@ test('"end" event emitted after other events', async () => {
 
   await sync.walk();
 });
+
 test('"end" event emitted before promise resolution', async () => {
   expect.assertions(1);
 
@@ -197,12 +209,14 @@ test('"end" event emitted before promise resolution', async () => {
 
   await sync.walk().then(() => (isPromiseResolved = true));
 });
+
 test("throws if root directory doesn't exist", async () => {
   const t = async () => {
     await stub({ root: 'do not exist' });
   };
   await expect(t).rejects.toThrow('ENOENT');
 });
+
 test('throws if aborted before walks', async () => {
   const sync = new FileSynchronizer(defaultOptions);
 
@@ -219,6 +233,7 @@ test('throws if aborted before walks', async () => {
   await expect(t).rejects.toThrow('operation was aborted');
   expect(eventsCounts).toStrictEqual([0, 0, 0]);
 });
+
 test('throws if aborted during execution', async () => {
   const sync = new FileSynchronizer(defaultOptions);
   const controller = new AbortController();
@@ -242,6 +257,7 @@ test('throws if aborted during execution', async () => {
   await expect(t).rejects.toThrow('operation was aborted');
   expect(fileEventCount).toBe(1);
 });
+
 test("doesn't reject if aborted after last file", async () => {
   const sync = new FileSynchronizer(defaultOptions);
   const controller = new AbortController();
@@ -259,6 +275,7 @@ test("doesn't reject if aborted after last file", async () => {
   // Should not throw
   await sync.walk({ signal: controller.signal });
 });
+
 test('file info should be correct', async () => {
   const sync = new FileSynchronizer({
     ...defaultOptions,
@@ -277,11 +294,30 @@ test('file info should be correct', async () => {
 
   const [file] = files;
   expect(file.path).toBe(join(process.cwd(), 'test-utils', 'a.txt'));
-  expect(file.relativePath).toBe(join('test-utils', 'a.txt'));
+  expect(file.relativePath).toBe('a.txt');
   expect(file.filename).toBe('a.txt');
   expect(file.extension).toBe('.txt');
   expect(file.size).toBe(491);
   expect(file.creationDate.getTime()).toBeLessThan(Date.now());
   expect(file.modificationDate.getTime()).toBeLessThan(Date.now());
   expect(typeof file.stat).toBe('object');
+});
+
+test('file name and paths checks', async () => {
+  const sync = new FileSynchronizer(defaultOptions);
+  const files: FileInfo[] = [];
+
+  sync.on('file', (fileInfo) => {
+    files.push(fileInfo);
+  });
+
+  await sync.walk();
+
+  expect(files).toHaveLength(4);
+
+  for (const file of files) {
+    expect(file.path).toBe(
+      join(process.cwd(), 'test-utils', file.relativePath),
+    );
+  }
 });
