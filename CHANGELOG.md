@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.2.1](https://www.github.com/zakodium/fs-synchronizer/compare/v0.2.0...v0.2.1) (2021-07-01)
+
+
+### Bug Fixes
+
+* relative path was absolute ([#13](https://www.github.com/zakodium/fs-synchronizer/issues/13)) ([5eb0d76](https://www.github.com/zakodium/fs-synchronizer/commit/5eb0d76b052bdc90e9a0ba3814b2fabf61916a5d))
+
 ## [0.2.0](https://www.github.com/zakodium/fs-synchronizer/compare/v0.1.0...v0.2.0) (2021-03-22)
 
 
